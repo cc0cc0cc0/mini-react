@@ -66,10 +66,12 @@ function render(el, container) {
     // })
     // el.props.children.forEach(child => render(child, dom));
     // container.appendChild(dom);
-
+    root = nextWorkOfUnit;
 }
 function createDom(type) {
-    return type === 'TEXT_ELEMENT' ? document.createTextNode("") : document.createElement(type);
+    return type === 'TEXT_ELEMENT' 
+                    ? document.createTextNode("") 
+                    : document.createElement(type);
 }
 
 function updateProps(dom,props) {
@@ -80,18 +82,8 @@ function updateProps(dom,props) {
     })
     
 }
-let nextWorkOfUnit = null;
-//为什么performanceWork入参里不加一个container呢。对标render
-function performanceWork(fiber) {
-    if (!fiber.dom) {
-        //1.渲染dom
-        const dom = (fiber.dom) = createDom(fiber.type);
-        //2.处理props
-        updateProps(dom,fiber.props);
-        fiber.parent.dom.append(dom);
-    }
 
-    //3.转换链表
+function initChildrenList(fiber){
     let children = fiber.props.children;
     let preChild = null
     children.forEach((child, index) => {
@@ -111,6 +103,21 @@ function performanceWork(fiber) {
         }
         preChild = newFiber;
     });
+}
+let nextWorkOfUnit = null;
+let root = null;
+//为什么performanceWork入参里不加一个container呢。对标render
+function performanceWork(fiber) {
+    if (!fiber.dom) {
+        //1.渲染dom
+        const dom = (fiber.dom) = createDom(fiber.type);
+        //2.处理props
+        updateProps(dom,fiber.props);
+        fiber.parent.dom.append(dom);
+    }
+
+    //3.转换链表
+    initChildrenList(fiber);
     //4.返回下次需要渲染的任务
     if (fiber.child) {
         return fiber.child
@@ -127,10 +134,26 @@ function workLoop(IdleDeadline) {
         nextWorkOfUnit = performanceWork(nextWorkOfUnit);
         shouldYield = IdleDeadline.timeRemaining() < 1;
     }
+    if(!nextWorkOfUnit && root){
+        commitRoot(root.child);
+    }
     requestIdleCallback(workLoop)
 }
 requestIdleCallback(workLoop);
 
+function commitRoot(fiber){
+    commitWork(fiber);
+    root = null;
+}
+function commitWork(fiber){
+    if(!fiber){
+        return;
+    }
+    fiber.parent.dom.append(dom);
+    commitWork(fiber.child);
+    commitWork(fiber.sibling);
+
+}
 const React = {
     createElement,
     render
