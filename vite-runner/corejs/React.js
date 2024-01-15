@@ -50,7 +50,7 @@ function createTextElement(text) {
 // dom.appendChild(textNode);
 
 //真实渲染dom
-let nextWorkOfUnit = null;
+
 function render(el, container) {
     nextWorkOfUnit = {
         dom: container,
@@ -80,6 +80,7 @@ function updateProps(dom,props) {
     })
     
 }
+let nextWorkOfUnit = null;
 //为什么performanceWork入参里不加一个container呢。对标render
 function performanceWork(fiber) {
     if (!fiber.dom) {
@@ -100,7 +101,8 @@ function performanceWork(fiber) {
             props: child.props,
             child: null,
             parent: fiber,
-            sibling: null
+            sibling: null,
+            dom:null
         }
         if (index === 0) {
             fiber.child = newFiber;
