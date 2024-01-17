@@ -1,13 +1,13 @@
 import React from './corejs/React.js';
 // const App=React.createElement("div",{id:'app'},'hi-','mini','react');
-let count;
+let count=11;
 let props = {id:'111'}
 function Counter({ num }) {
-    count=num
     function handleClick() {
         console.log('click');
         count++
-        props = {}
+        console.log(count);
+        props = {id:'222'}
         React.update()
     }
     return <div {...props}>counter:{count}<button onClick={handleClick}>Click</button></div>

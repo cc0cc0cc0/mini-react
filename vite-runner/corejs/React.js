@@ -84,6 +84,7 @@ function updateProps(dom, nextProps,preProps) {
     Object.keys(preProps).forEach(key => {
         if (key !== 'children') {
             if (!(key in nextProps)){
+                console.log("要删除的属性",key)
                 dom.removeAttribute(key);
             }
             // if(key.startsWith("on")){
@@ -105,6 +106,7 @@ function updateProps(dom, nextProps,preProps) {
                     dom.addEventListener(eventType,nextProps[key])
                 } else{
                     dom[key] = nextProps[key];
+                    console.log(nextProps[key]);
                 }
             }
         }
@@ -127,7 +129,7 @@ function initChildrenList(fiber, children) {
                 child: null,
                 parent: fiber,
                 sibling: null,
-                dom: oldFiber.com,
+                dom: oldFiber.dom,
                 effctTag:'update',
                 alternate:oldFiber
             }
