@@ -1,22 +1,25 @@
 import React from './corejs/React.js';
 // const App=React.createElement("div",{id:'app'},'hi-','mini','react');
-let count=11;
-let props = {id:'111'}
+let showBar = false;
+let props = { id: '111' }
 function Counter({ num }) {
+    const foo = <div>foo<div>child1</div><div>child2</div></div>
+    const bar = (<div>bar</div>)
     function handleClick() {
-        console.log('click');
-        count++
-        console.log(count);
-        props = {id:'222'}
+        showBar = !showBar;
         React.update()
     }
-    return <div {...props}>counter:{count}<button onClick={handleClick}>Click</button></div>
+    return (<div {...props}>
+        counter
+        {showBar && bar}
+        <button onClick={handleClick}>Click</button>
+        </div>)
 }
 
 const App = (
     <div>
         hi-mini-react
-        <Counter num={10}></Counter>
+        <Counter></Counter>
         {/* <Counter num={20}></Counter>
         <Counter num={30}></Counter> */}
     </div>
