@@ -1,28 +1,51 @@
 import React from './corejs/React.js';
 // const App=React.createElement("div",{id:'app'},'hi-','mini','react');
-let showBar = false;
-let props = { id: '111' }
-function Counter({ num }) {
-    const foo = <div>foo<div>child1</div><div>child2</div></div>
-    const bar = (<div>bar</div>)
-    function handleClick() {
-        showBar = !showBar;
-        React.update()
+let countFoo = 0;
+let countBar = 0;
+let countApp = 0;
+function Foo(){
+    console.log("Foo rerun")
+    const update = React.update();
+    function handleClick(){
+        countFoo++;
+        update()
     }
-    return (<div {...props}>
-        counter
-        {showBar && bar}
-        <button onClick={handleClick}>Click</button>
-        </div>)
+    return (
+        <div>
+            foo:{countFoo}
+            <button onClick={handleClick}>click</button>
+        </div>
+    )
 }
-
-const App = (
-    <div>
-        hi-mini-react
-        <Counter></Counter>
-        {/* <Counter num={20}></Counter>
-        <Counter num={30}></Counter> */}
-    </div>
-)
+function Bar(){
+    console.log("Bar rerun")
+    const update = React.update();
+    function handleClick(){
+        countBar++;
+        update()
+    }
+    return (
+        <div>
+            Bar:{countBar}
+            <button onClick={handleClick}>click</button>
+        </div>
+    )
+}
+function App(){
+    console.log("App rerun")
+    const update = React.update();
+    function handleClick(){
+        countApp++;
+        update();
+    }
+    return (
+        <div>
+            hi-mini-react: {countApp}
+            <button onClick={handleClick}>click</button>
+            <Foo></Foo>
+            <Bar></Bar>
+        </div>
+    )
+}
 console.log(App);
 export default App;

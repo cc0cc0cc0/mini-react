@@ -23,7 +23,6 @@
 
 //创建vdom
 function createElement(type, props, ...children) {
-    console.log("🚀 ~ createElement ~ type, props, ...children:", type, props, ...children)
     return {
         type,
         props: {
@@ -174,7 +173,9 @@ let nextWorkOfUnit = null;
 let wipRoot = null;
 let currentRoot = null
 let deletions = []  //待删除节点
+let wipFiber = null;
 function updateFunctionComponent(fiber) {
+    wipFiber = fiber;
     const children = [fiber.type(fiber.props)];
     reconcileChildren(fiber, children);
 }
@@ -231,6 +232,9 @@ function workLoop(IdleDeadline) {
     while (!shouldYield && nextWorkOfUnit) {
         //do some work
         nextWorkOfUnit = performanceWork(nextWorkOfUnit);
+        if(wipRoot?.sibling?.type === nextWorkOfUnit?.type){
+            nextWorkOfUnit = undefined
+        }
         shouldYield = IdleDeadline.timeRemaining() < 1;
     }
     if (!nextWorkOfUnit && wipRoot) {
@@ -282,12 +286,18 @@ function commitWork(fiber) {
 }
 //更新节点和属性
 function update() {
-    wipRoot = {
-        dom: currentRoot.dom,
-        props: currentRoot.props,
-        alternate: currentRoot
+    let currentFiber = wipFiber;
+    return ()=>{
+        console.log(currentFiber);
+        wipRoot = {
+            //  dom: currentFiber.dom,
+            //  props: currentFiber.props,
+             ...currentFiber,
+            alternate: currentFiber
+        }
+        nextWorkOfUnit = wipRoot;
     }
-    nextWorkOfUnit = wipRoot;
+
 }
 const React = {
     createElement,
