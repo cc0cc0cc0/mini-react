@@ -158,10 +158,10 @@ function reconcileChildren(fiber, children) {
         } else {
             preChild.sibling = newFiber;
         }
-        if(newFiber){
+        if (newFiber) {
             preChild = newFiber;
         }
-       
+
     });
     while (oldFiber) {
         deletions.push(oldFiber)
@@ -234,7 +234,7 @@ function workLoop(IdleDeadline) {
     while (!shouldYield && nextWorkOfUnit) {
         //do some work
         nextWorkOfUnit = performanceWork(nextWorkOfUnit);
-        if(wipRoot?.sibling?.type === nextWorkOfUnit?.type){
+        if (wipRoot?.sibling?.type === nextWorkOfUnit?.type) {
             nextWorkOfUnit = undefined
         }
         shouldYield = IdleDeadline.timeRemaining() < 1;
@@ -289,12 +289,12 @@ function commitWork(fiber) {
 //更新节点和属性
 function update() {
     let currentFiber = wipFiber;
-    return ()=>{
+    return () => {
         console.log(currentFiber);
         wipRoot = {
             //  dom: currentFiber.dom,
             //  props: currentFiber.props,
-             ...currentFiber,
+            ...currentFiber,
             alternate: currentFiber
         }
         nextWorkOfUnit = wipRoot;
@@ -304,39 +304,39 @@ function update() {
 let stateHooks;
 let stateHookIndex;
 let stateHookQueue = [];
-function useState(initial){
+function useState(initial) {
     let currentFiber = wipFiber;
     let oldHook = wipFiber.alternate?.stateHooks[stateHookIndex];
     // 如果有oldHook应该使用oldHook
-    const stateHook={
-        state:oldHook ? oldHook.state : initial,
-        queue:oldHook ? oldHook.queue : []
+    const stateHook = {
+        state: oldHook ? oldHook.state : initial,
+        queue: oldHook ? oldHook.queue : []
     }
     stateHookIndex++;
     stateHooks.push(stateHook);
     currentFiber.stateHooks = stateHooks;
     //这里如何获取各自的action呢？ 原来是把队列加载stateHook中，就不用对应的state了。
-    stateHook.queue.forEach(action=>{
-        stateHook.state=action(stateHook.state);
+    stateHook.queue.forEach(action => {
+        stateHook.state = action(stateHook.state);
     })
     stateHook.queue = []
-    function setState(action){
-        let preFetchState = typeof action === 'function' ? action(stateHook.state) :action
-        if(preFetchState === stateHook.state) return;
-        stateHook.queue.push(typeof action === 'function' ? action :()=>action);
-        
+    function setState(action) {
+        let preFetchState = typeof action === 'function' ? action(stateHook.state) : action
+        if (preFetchState === stateHook.state) return;
+        stateHook.queue.push(typeof action === 'function' ? action : () => action);
+
         console.log(stateHook.state)
         wipRoot = {
             ...currentFiber,
-           alternate: currentFiber
-       }
-       nextWorkOfUnit = wipRoot;
+            alternate: currentFiber
+        }
+        nextWorkOfUnit = wipRoot;
     }
 
 
 
 
-    return [stateHook.state,setState]
+    return [stateHook.state, setState]
 }
 const React = {
     createElement,

@@ -1,11 +1,11 @@
 import React from './corejs/React.js';
 // const App=React.createElement("div",{id:'app'},'hi-','mini','react');
-function Foo(){
+function Foo() {
     console.log("Foo rerun")
-    const [countFoo,setCountFoo] = React.useState(0);
-    const [bar,setBar] = React.useState("bar");
-    function handleClick(){
-        setCountFoo((c)=>c+1);
+    const [countFoo, setCountFoo] = React.useState(0);
+    const [bar, setBar] = React.useState("bar");
+    function handleClick() {
+        setCountFoo((c) => c + 1);
         setBar("barabc")
     }
     return (
@@ -16,10 +16,10 @@ function Foo(){
         </div>
     )
 }
-function Bar(){
+function Bar() {
     console.log("Bar rerun")
     const update = React.update();
-    function handleClick(){
+    function handleClick() {
         countBar++;
         update()
     }
@@ -30,7 +30,7 @@ function Bar(){
         </div>
     )
 }
-function App(){
+function App() {
     return (
         <div>
             hi-mini-react
