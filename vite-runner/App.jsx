@@ -1,18 +1,17 @@
 import React from './corejs/React.js';
 // const App=React.createElement("div",{id:'app'},'hi-','mini','react');
-let countFoo = 0;
-let countBar = 0;
-let countApp = 0;
 function Foo(){
     console.log("Foo rerun")
-    const update = React.update();
+    const [countFoo,setCountFoo] = React.useState(0);
+    const [bar,setBar] = React.useState("bar");
     function handleClick(){
-        countFoo++;
-        update()
+        setCountFoo((c)=>c+1);
+        setBar("barabc")
     }
     return (
         <div>
             foo:{countFoo}
+            <div>{bar}</div>
             <button onClick={handleClick}>click</button>
         </div>
     )
@@ -32,18 +31,10 @@ function Bar(){
     )
 }
 function App(){
-    console.log("App rerun")
-    const update = React.update();
-    function handleClick(){
-        countApp++;
-        update();
-    }
     return (
         <div>
-            hi-mini-react: {countApp}
-            <button onClick={handleClick}>click</button>
+            hi-mini-react
             <Foo></Foo>
-            <Bar></Bar>
         </div>
     )
 }
