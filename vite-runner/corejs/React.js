@@ -116,6 +116,7 @@ function reconcileChildren(fiber, children) {
     // let children = fiber.props.children
     let oldFiber = fiber.alternate?.child;
     let preChild = null
+    let hasChild = false
     children.forEach((child, index) => {
         //TODO 这个newFiber的child和sibling都没设置呢。后面怎么用的呢？答案是使用了链表，后续有赋值
         let isSameType = oldFiber && oldFiber.type === child.type;
@@ -128,7 +129,7 @@ function reconcileChildren(fiber, children) {
                 parent: fiber,
                 sibling: null,
                 dom: oldFiber.dom,
-                effctTag: 'update',
+                effectTag: 'update',
                 alternate: oldFiber
             }
         } else {
@@ -140,7 +141,7 @@ function reconcileChildren(fiber, children) {
                     parent: fiber,
                     sibling: null,
                     dom: null,
-                    effctTag: 'placement'
+                    effectTag: 'placement'
                 }
             }
             if (oldFiber) {
@@ -156,7 +157,12 @@ function reconcileChildren(fiber, children) {
         if (index === 0) {
             fiber.child = newFiber;
         } else {
-            preChild.sibling = newFiber;
+            if (preChild !== null) {
+                preChild.sibling = newFiber;
+            } else {
+                fiber.child = newFiber;
+            }
+
         }
         if (newFiber) {
             preChild = newFiber;
@@ -176,6 +182,7 @@ let deletions = []  //待删除节点
 let wipFiber = null;
 function updateFunctionComponent(fiber) {
     stateHooks = [];
+    effectHooks = [];
     stateHookIndex = 0;
     wipFiber = fiber;
     const children = [fiber.type(fiber.props)];
@@ -250,8 +257,50 @@ function commitRoot(fiber) {
     deletions.forEach(commitDeletion)
     commitWork(fiber);
     currentRoot = wipRoot;
+    commitEffectHook();
     wipRoot = null;
     deletions = []
+}
+
+function commitEffectHook() {
+    function run(fiber) {
+        if (!fiber) return;
+        //如果节点有effectHook,则执行,没有就继续往下
+        if (!fiber.alternate) {
+            //init
+            fiber.effectHooks?.forEach((hook) => {
+                hook.cleanup = hook.callback();
+            })
+
+        } else {
+            //update 通过some看依赖数组是否有更新的
+            fiber.effectHooks?.forEach((newHook, i) => {
+                const oldEffectHook = fiber.alternate.effectHooks[i];
+                const needUpdate = oldEffectHook?.deps.some(function (oldDeps, index) {
+                    return oldDeps !== newHook.deps[index];
+                })
+                needUpdate && (newHook.cleanup = newHook.callback());
+            })
+
+        }
+
+        run(fiber.child);
+        run(fiber.sibling)
+    }
+    function runCleanup(fiber) {
+        if (!fiber) return;
+        //这里是一个重点,需要的是老的节点的alternate的
+        fiber.alternate?.effectHooks?.forEach(hook => {
+            if (hook.deps.length > 0) {
+                hook.cleanup && hook.cleanup();
+            }
+
+        })
+        runCleanup(fiber.child);
+        runCleanup(fiber.sibling);
+    }
+    runCleanup(wipRoot)
+    run(wipRoot)
 }
 
 function commitDeletion(fiber) {
@@ -273,9 +322,9 @@ function commitWork(fiber) {
     while (!fiberParent.dom) {
         fiberParent = fiberParent.parent
     }
-    if (fiber.effctTag === "update") {
+    if (fiber.effectTag === "update") {
         updateProps(fiber.dom, fiber.props, fiber.alternate?.props);
-    } else if (fiber.effctTag === "placement") {
+    } else if (fiber.effectTag === "placement") {
         if (fiber.dom) {
             fiberParent.dom.append(fiber.dom);
         }
@@ -325,7 +374,7 @@ function useState(initial) {
         if (preFetchState === stateHook.state) return;
         stateHook.queue.push(typeof action === 'function' ? action : () => action);
 
-        console.log(stateHook.state)
+        console.log('stateHook.state', stateHook.state)
         wipRoot = {
             ...currentFiber,
             alternate: currentFiber
@@ -338,11 +387,22 @@ function useState(initial) {
 
     return [stateHook.state, setState]
 }
+let effectHooks;
+function useEffect(callback, deps) {
+    const effectHook = {
+        callback,
+        deps,
+        cleanup: undefined
+    }
+    effectHooks.push(effectHook);
+    wipFiber.effectHooks = effectHooks
+}
 const React = {
     createElement,
     render,
     update,
-    useState
+    useState,
+    useEffect
 }
 
 export default React;
