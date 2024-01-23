@@ -404,5 +404,5 @@ const React = {
     useState,
     useEffect
 }
-export const VERSION = DAY7;
+export const VERSION = "DAY7";
 export default React;
